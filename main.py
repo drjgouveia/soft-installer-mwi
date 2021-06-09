@@ -4,6 +4,14 @@ from time import sleep
 from tkinter import *
 import os
 import winget_export
+import ctypes, sys
+
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 
 software = [("Anydesk", "AnyDeskSoftwareGmbH.AnyDeskMSI"),
@@ -38,16 +46,16 @@ class MyFirstGUI:
         self.label.pack(in_=self.top, side=TOP, fill=X, ipady=10)
         self.label.config(font=("Arial", 16), anchor=CENTER)
 
-#        i = 1
-#        u = 0
+        #        i = 1
+        #        u = 0
         k = 0
-#        self.label.grid(row=0, column=0, columnspan=2)
+        #        self.label.grid(row=0, column=0, columnspan=2)
 
         for name, package in software:
             soft.append(Variable(value=(0, package)))
-            self.option_button = Checkbutton(master, width=75,text=name, onvalue=(1, package), offvalue=(0, package),
+            self.option_button = Checkbutton(master, width=75, text=name, onvalue=(1, package), offvalue=(0, package),
                                              variable=soft[k])
-#            self.option_button.grid(row=i, column=u)
+            #            self.option_button.grid(row=i, column=u)
             self.option_button.pack(in_=self.mid, fill=X)
             k += 1
 
@@ -80,6 +88,9 @@ class MyFirstGUI:
 
 
 if __name__ == '__main__':
+    if not is_admin():
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+
     try:
         print("Conectando a la Wifi...")
         ssid = "MagicWorld - SAT"
@@ -106,7 +117,7 @@ if __name__ == '__main__':
     print("Empienzando la GUI.")
     root = Tk()
     x = 50 + 30 * len(software)
-    root.geometry("400x"+str(x))
+    root.geometry("400x" + str(x))
     my_gui = MyFirstGUI(root)
     root.mainloop()
     print("Bye!")
