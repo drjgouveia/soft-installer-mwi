@@ -1,0 +1,6 @@
+comtypes
+plumbum
+
+[dev]
+
+[test]

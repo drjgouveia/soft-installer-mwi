@@ -1,0 +1,3 @@
+[console_scripts]
+wifi = winwifi.__main__:main
+
