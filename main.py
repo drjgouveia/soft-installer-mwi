@@ -3,6 +3,8 @@ import winwifi
 from time import sleep
 from tkinter import *
 import os
+import winget_export
+
 
 software = [("Anydesk", "AnyDeskSoftwareGmbH.AnyDeskMSI"),
             ("Firefox", "Mozilla.FirefoxESR"),
@@ -57,7 +59,6 @@ class MyFirstGUI:
         self.close_button.config(anchor=CENTER)
         self.close_button.pack(in_=self.bottom, side=RIGHT, ipadx=50, padx=50)
 
-
     def install(self):
         total = 0
         for s in soft:
@@ -77,6 +78,7 @@ class MyFirstGUI:
                 os.system(line)
                 line = ini
 
+
 if __name__ == '__main__':
     try:
         print("Conectando a la Wifi...")
@@ -93,8 +95,10 @@ if __name__ == '__main__':
 
     try:
         print("Instalando WinGet...")
-        cmd = "Add-AppxPackage \".\\Microsoft.DesktopAppInstaller.appxbundle\""
+        winget_export.export()
+        cmd = "Add-AppxPackage \".\\winget.appxbundle\""
         completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+        winget_export.delete()
         print("Instalado.\n")
     except Exception as e:
         pass
