@@ -37,10 +37,12 @@ class MyFirstGUI:
         self.master.title("Software MWI installer")
         self.top = Frame(self.master)
         self.mid = Frame(self.master)
+        self.mid2 = Frame(self.master)
         self.bottom = Frame(self.master)
         self.top.pack(side=TOP)
         self.mid.pack(side=TOP)
-        self.bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
+        self.mid2.pack(side=TOP, ipady=15)
+        self.bottom.pack(side=BOTTOM, fill=BOTH, expand=True, ipady=10, pady=10)
 
         self.label = Label(master, text="Elija el software")
         self.label.pack(in_=self.top, side=TOP, fill=X, ipady=10)
@@ -57,15 +59,20 @@ class MyFirstGUI:
                                              variable=soft[k])
             #            self.option_button.grid(row=i, column=u)
             self.option_button.pack(in_=self.mid, fill=X)
+            self.option_button.select()
             k += 1
 
         self.install_button = Button(master, text="Install", command=self.install)
         self.install_button.config(anchor=CENTER)
-        self.install_button.pack(in_=self.bottom, side=LEFT, ipadx=50, padx=50)
+        self.install_button.pack(in_=self.mid2, side=LEFT, ipadx=50, padx=50)
+
+        self.update_button = Button(master, text="Update Windows", command=self.update)
+        self.update_button.config(anchor=CENTER)
+        self.update_button.pack(in_=self.mid2, side=RIGHT, ipadx=20, padx=20)
 
         self.close_button = Button(master, text="Close", command=master.quit)
         self.close_button.config(anchor=CENTER)
-        self.close_button.pack(in_=self.bottom, side=RIGHT, ipadx=50, padx=50)
+        self.close_button.pack(in_=self.bottom, side=BOTTOM, ipadx=50, padx=50)
 
     def install(self):
         total = 0
@@ -85,6 +92,19 @@ class MyFirstGUI:
                 line = line + name + " -e --silent"
                 os.system(line)
                 line = ini
+
+    def update(self):
+        beforePolicy = subprocess.run(["powershell", "-Command", "Get-ExecutionPolicy"], capture_output=True).stdout.decode("utf-8")
+        subprocess.run(["powershell", "-Command", "Set-ExecutionPolicy Unrestricted -Force"], capture_output=True)
+
+        print("Instalando el Updater por la CMD.")
+        subprocess.run(["powershell", "-Command", "Install-Module PSWindowsUpdate -Force"], capture_output=True)
+
+        print("Empiezando a procurar atualizaciones.")
+        procurandoUpdate = subprocess.run(["powershell", "-Command", "Import-Module PSWindowsUpdate; Get-WindowsUpdate; Install-WindowsUpdate -ForceDownload -ForceInstall -AcceptAll -AutoReboot"],
+                                       capture_output=True)
+        print("Actualizado.")
+        subprocess.run(["powershell", "-Command", "Set-ExecutionPolicy" + beforePolicy + " -Force"], capture_output=True)
 
 
 if __name__ == '__main__':
@@ -116,7 +136,7 @@ if __name__ == '__main__':
 
     print("Empienzando la GUI.")
     root = Tk()
-    x = 50 + 30 * len(software)
+    x = 100 + 30 * len(software)
     root.geometry("400x" + str(x))
     my_gui = MyFirstGUI(root)
     root.mainloop()
