@@ -1,8 +1,10 @@
 import subprocess
-import winwifi
 from time import sleep
 from tkinter import *
 import os
+
+import requests as requests
+
 import winget_export
 import ctypes, sys
 
@@ -111,16 +113,13 @@ if __name__ == '__main__':
     if not is_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
+    url = "http://www.example.com"
+    timeout = 5
     try:
-        print("Conectando a la Wifi...")
-        ssid = "MagicWorld - SAT"
-        password = ""
-        winwifi.WinWiFi.connect(ssid, password)
-        print("Conectado.\n")
-        sleep(5)
-
-    except Exception as e:
-        print("Hubo un error con la conexion a la Wifi.")
+        request = requests.get(url, timeout=timeout)
+        print("Conectado a la internet.")
+    except (requests.ConnectionError, requests.Timeout) as exception:
+        print("No hay conexion a la internet.")
         if input("Te gustaria continuar? (Y/n) ") in ("N", "n"):
             exit()
 
