@@ -1,10 +1,8 @@
+import base64
 import subprocess
-from time import sleep
 from tkinter import *
 import os
-
-import requests as requests
-
+import requests
 import winget_export
 import ctypes, sys
 
@@ -35,7 +33,6 @@ soft = []
 class MyFirstGUI:
     def __init__(self, master):
         self.master = master
-        self.master.iconbitmap('icon.ico')
         self.master.title("Software MWI installer")
         self.top = Frame(self.master)
         self.mid = Frame(self.master)
@@ -112,6 +109,7 @@ class MyFirstGUI:
 if __name__ == '__main__':
     if not is_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        exit()
 
     url = "http://www.example.com"
     timeout = 5
