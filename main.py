@@ -117,7 +117,7 @@ class MyFirstGUI:
         subprocess.run(["powershell", "-Command", "Install-Module PSWindowsUpdate -Force"], capture_output=True)
 
         print("Empiezando a procurar atualizaciones.")
-        procurandoUpdate = subprocess.run(["powershell", "-Command", "Import-Module PSWindowsUpdate; Get-WindowsUpdate; Install-WindowsUpdate -ForceDownload -ForceInstall -AcceptAll -AutoReboot"],
+        procurandoUpdate = subprocess.run(["powershell", "-Command", "Import-Module PSWindowsUpdate; Get-WindowsUpdate; Install-WindowsUpdate -ForceDownload -ForceInstall -AcceptAll -IgnoreReboot"],
                                        capture_output=True)
         print("Actualizado.")
         subprocess.run(["powershell", "-Command", "Set-ExecutionPolicy" + beforePolicy + " -Force"], capture_output=True)
