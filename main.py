@@ -55,8 +55,8 @@ class MyFirstGUI:
         #        self.label.grid(row=0, column=0, columnspan=2)
 
         for name, package in software:
-            soft.append(Variable(value=(0, package)))
-            self.option_button = Checkbutton(master, width=75, text=name, onvalue=(1, package), offvalue=(0, package),
+            soft.append(Variable(value=(0, package, name)))
+            self.option_button = Checkbutton(master, width=75, text=name, onvalue=(1, package, name), offvalue=(0, package, name),
                                              variable=soft[k])
             #            self.option_button.grid(row=i, column=u)
             self.option_button.pack(in_=self.mid, fill=X)
@@ -89,10 +89,25 @@ class MyFirstGUI:
         for s in soft:
             active = int(s.get()[0])
             if active == 1:
-                name = str(s.get()).replace("1 ", "")
-                line = line + name + " -e --silent"
-                os.system(line)
+                package = str(s.get()).replace("1 ", "").split(" ")[0]
+                name = " ".join(str(s.get()).replace("1 ", "").split(" ")[1:]).replace("{", "").replace("}", "")
+                line = line + package + " -e --silent"
+                return_code = os.system(line)
+
+                if return_code != 0:
+                    self.popupmsg(name + " could not be installed. Check the terminal for more information.")
+
                 line = ini
+
+    def popupmsg(self, msg):
+        popup = Tk()
+        popup.title("Error - Package not installed")
+        label = Label(popup, text=msg)
+        label.grid(column=0, row=0, pady=15, padx=15, ipadx=15)
+
+        B1 = Button(popup, text="Okay", command=popup.destroy)
+        B1.grid(column=0, row=1, pady=15)
+        popup.mainloop()
 
     def update(self):
         beforePolicy = subprocess.run(["powershell", "-Command", "Get-ExecutionPolicy"], capture_output=True).stdout.decode("utf-8")
