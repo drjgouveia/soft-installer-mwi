@@ -2,6 +2,7 @@ import base64
 import subprocess
 from tkinter import *
 import os
+import urllib.request
 import requests
 import winget_export
 import ctypes, sys
@@ -95,7 +96,14 @@ class MyFirstGUI:
                 return_code = os.system(line)
 
                 if return_code != 0:
-                    self.popupmsg(name + " could not be installed. Check the terminal for more information.")
+                    if name == "Google Chrome":
+                        url = "https://ninite.com/chrome/ninite.exe"
+                        urllib.request.urlretrieve(url, "chrome.exe")
+                        os.system("chrome.exe")
+                        os.remove("chrome.exe")
+
+                    else:
+                        self.popupmsg(name + " could not be installed. Check the terminal for more information.")
 
                 line = ini
 
