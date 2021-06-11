@@ -5,6 +5,7 @@ import os
 import requests
 import winget_export
 import ctypes, sys
+import getpass
 
 
 def is_admin():
@@ -14,6 +15,7 @@ def is_admin():
         return False
 
 
+USER_NAME = getpass.getuser()
 software = [("Anydesk", "AnyDeskSoftwareGmbH.AnyDeskMSI"),
             ("Firefox", "Mozilla.FirefoxESR"),
             ("Google Chrome", "Google.Chrome"),
