@@ -17,18 +17,19 @@ def is_admin():
 
 
 USER_NAME = getpass.getuser()
-software = [("Anydesk", "AnyDeskSoftwareGmbH.AnyDeskMSI"),
-            ("Firefox", "Mozilla.FirefoxESR"),
-            ("Google Chrome", "Google.Chrome"),
-            ("7-Zip", "7zip.7zip"),
-            ("K-Lite Codecs", "CodecGuide.K-LiteCodecPackStandard"),
-            ("VLC", "VideoLAN.VLC"),
-            ("Zoom", "Zoom.Zoom"),
-            ("Adobe Reader DC", "Adobe.AdobeAcrobatReaderDC"),
-            ("LibreOffice", "LibreOffice.LibreOffice"),
-            ("OpenJDK 14", "AdoptOpenJDK.OpenJDK.14"),
-            ("OpenJDK 15", "AdoptOpenJDK.OpenJDK.15"),
-            ("OpenJDK 16", "AdoptOpenJDK.OpenJDK.16")]
+# Format: (NAME, PACKAGE NAME IN WINGET, PACKAGE NAME IN CHOCOLATEY)
+software = [("Anydesk", "AnyDeskSoftwareGmbH.AnyDeskMSI", "anydesk"),
+            ("Firefox", "Mozilla.FirefoxESR", "firefox"),
+            ("Google Chrome", "Google.Chrome", "googlechrome"),
+            ("7-Zip", "7zip.7zip", "7zip"),
+            ("K-Lite Codecs", "CodecGuide.K-LiteCodecPackStandard", "k-litecodecpack-standard"),
+            ("VLC", "VideoLAN.VLC", "vlc"),
+            ("Zoom", "Zoom.Zoom", "zoom"),
+            ("Adobe Reader DC", "Adobe.AdobeAcrobatReaderDC", "adobereader"),
+            ("LibreOffice", "LibreOffice.LibreOffice", "libreoffice-fresh"),
+            ("OpenJDK 14", "AdoptOpenJDK.OpenJDK.14", "adoptopenjdk14"),
+            ("OpenJDK 15", "AdoptOpenJDK.OpenJDK.15", "adoptopenjdk15openj9"),
+            ("OpenJDK 16", "AdoptOpenJDK.OpenJDK.16", "adoptopenjdkopenj9")]
 
 soft = []
 
@@ -55,9 +56,10 @@ class MyFirstGUI:
         k = 0
         #        self.label.grid(row=0, column=0, columnspan=2)
 
-        for name, package in software:
-            soft.append(Variable(value=(0, package, name)))
-            self.option_button = Checkbutton(master, width=75, text=name, onvalue=(1, package, name), offvalue=(0, package, name),
+        for name, package, choco in software:
+            string = str(name) + "," + str(package) + "," + str(choco)
+            soft.append(Variable(value=(0, string)))
+            self.option_button = Checkbutton(master, width=75, text=name, onvalue=(1, string), offvalue=(0, string),
                                              variable=soft[k])
             #            self.option_button.grid(row=i, column=u)
             self.option_button.pack(in_=self.mid, fill=X)
@@ -90,21 +92,24 @@ class MyFirstGUI:
         for s in soft:
             active = int(s.get()[0])
             if active == 1:
-                package = str(s.get()).replace("1 ", "").split(" ")[0]
-                name = " ".join(str(s.get()).replace("1 ", "").split(" ")[1:]).replace("{", "").replace("}", "")
-                line = line + package + " -e --silent"
+                try:
+                    name = str(s.get()).split("'")[1].replace("{", "").replace("}", "").split(",")[0].replace("1 ", "")
+                    winget = str(s.get()).split("'")[1].replace("{", "").replace("}", "").split(",")[1]
+                    choco = str(s.get()).split("'")[1].replace("{", "").replace("}", "").split(",")[2]
+                except IndexError:
+                    name = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[0]
+                    winget = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[1]
+                    choco = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[2]
+
+                line = line + winget + " -e --silent"
                 return_code = os.system(line)
 
                 if return_code != 0:
-                    if name == "Google Chrome":
-                        url = "https://ninite.com/chrome/ninite.exe"
-                        urllib.request.urlretrieve(url, "chrome.exe")
-                        os.system("chrome.exe")
-                        os.remove("chrome.exe")
+                    print("Winget dio un error. Empiezando con Chocolatey.")
+                    return_code = subprocess.run(["powershell", "-Command", "choco install " + str(choco) + " -y"], capture_output=True)
 
-                    else:
+                    if return_code != 0:
                         self.popupmsg(name + " could not be installed. Check the terminal for more information.")
-
                 line = ini
 
     def popupmsg(self, msg):
@@ -140,7 +145,7 @@ if __name__ == '__main__':
     timeout = 5
     try:
         request = requests.get(url, timeout=timeout)
-        print("Conectado a la internet.")
+        print("Conectado a la internet.\n")
     except (requests.ConnectionError, requests.Timeout) as exception:
         print("No hay conexion a la internet.")
         if input("Te gustaria continuar? (Y/n) ") in ("N", "n"):
@@ -152,6 +157,12 @@ if __name__ == '__main__':
         cmd = "Add-AppxPackage \".\\winget.appxbundle\""
         completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
         winget_export.delete()
+        print("Instalado.\n")
+
+        print("Instalando Chocolatey...")
+        cmd = "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+        subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+        subprocess.run(["powershell", "-Command", "choco upgrade chocolatey"], capture_output=True)
         print("Instalado.\n")
     except Exception as e:
         pass
