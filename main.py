@@ -1,8 +1,6 @@
-import base64
 import subprocess
 from tkinter import *
 import os
-import urllib.request
 import requests
 import winget_export
 import ctypes, sys
@@ -110,6 +108,7 @@ class MyFirstGUI:
 
                     if return_code != 0:
                         self.popupmsg(name + " could not be installed. Check the terminal for more information.")
+
                 line = ini
 
     def popupmsg(self, msg):
@@ -120,7 +119,7 @@ class MyFirstGUI:
 
         B1 = Button(popup, text="Okay", command=popup.destroy)
         B1.grid(column=0, row=1, pady=15)
-        popup.mainloop()
+        popup.update()
 
     def update(self):
         beforePolicy = subprocess.run(["powershell", "-Command", "Get-ExecutionPolicy"], capture_output=True).stdout.decode("utf-8")
