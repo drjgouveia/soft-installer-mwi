@@ -34,6 +34,7 @@ soft = []
 
 class MyFirstGUI:
     def __init__(self, master):
+        global soft
         self.master = master
         self.master.title("Software MWI installer")
         self.top = Frame(self.master)
@@ -54,6 +55,7 @@ class MyFirstGUI:
         k = 0
         #        self.label.grid(row=0, column=0, columnspan=2)
 
+        soft = []
         for name, package, choco in software:
             string = str(name) + "," + str(package) + "," + str(choco)
             soft.append(Variable(value=(0, string)))
@@ -95,7 +97,7 @@ class MyFirstGUI:
                     winget = str(s.get()).split("'")[1].replace("{", "").replace("}", "").split(",")[1]
                     choco = str(s.get()).split("'")[1].replace("{", "").replace("}", "").split(",")[2]
                 except IndexError:
-                    name = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[0]
+                    name = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[0].replace("1 ", "")
                     winget = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[1]
                     choco = str(s.get()).split("'")[0].replace("{", "").replace("}", "").split(",")[2]
 
@@ -107,19 +109,28 @@ class MyFirstGUI:
                     return_code = subprocess.run(["powershell", "-Command", "choco install " + str(choco) + " -y"], capture_output=True)
 
                     if return_code != 0:
-                        self.popupmsg(name + " could not be installed. Check the terminal for more information.")
+                        winget_export.export()
+                        self.popupmsg(name + " could not be installed. Please install the winget manually (file in the same place as the executable)\nand click okay for the program to restart.")
+                        break
 
                 line = ini
 
+    def restartProg(self):
+        winget_export.delete()
+        self.popup.destroy()
+        self.master.destroy()
+        os.system('cls')
+        main()
+
     def popupmsg(self, msg):
-        popup = Tk()
-        popup.title("Error - Package not installed")
-        label = Label(popup, text=msg)
+        self.popup = Tk()
+        self.popup.title("Error - Package not installed")
+        label = Label(self.popup, text=msg)
         label.grid(column=0, row=0, pady=15, padx=15, ipadx=15)
 
-        B1 = Button(popup, text="Okay", command=popup.destroy)
+        B1 = Button(self.popup, text="Okay", command=self.restartProg)
         B1.grid(column=0, row=1, pady=15)
-        popup.update()
+        self.popup.update()
 
     def update(self):
         beforePolicy = subprocess.run(["powershell", "-Command", "Get-ExecutionPolicy"], capture_output=True).stdout.decode("utf-8")
@@ -135,7 +146,7 @@ class MyFirstGUI:
         subprocess.run(["powershell", "-Command", "Set-ExecutionPolicy" + beforePolicy + " -Force"], capture_output=True)
 
 
-if __name__ == '__main__':
+def main():
     if not is_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         exit()
@@ -173,3 +184,7 @@ if __name__ == '__main__':
     my_gui = MyFirstGUI(root)
     root.mainloop()
     print("Bye!")
+
+
+if __name__ == '__main__':
+    main()
